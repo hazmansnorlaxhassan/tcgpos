@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 
-const pool = mysql.createPool({
+/*const pool = mysql.createPool({
   host: process.env.DB_HOST || '127.0.0.1',
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || '',
@@ -12,16 +12,19 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
+});*/
+
+
+const pool = mysql.createPool({
+  host: process.env.MYSQLHOST,
+  user: process.env.MYSQLUSER,
+  password: process.env.MYSQLPASSWORD,
+  database: process.env.MYSQLDATABASE,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
 
-// Fallback for Railway when DB_HOST is missing but Railway provides it in env
-if (process.env.DB_HOST === 'mysql' && process.env.RAILWAY_PRIVATE_DOMAIN) {
-  pool.options.host = process.env.RAILWAY_PRIVATE_DOMAIN;
-  console.log('Using Railway private domain for DB_HOST:', process.env.RAILWAY_PRIVATE_DOMAIN);
-} else if (process.env.DB_HOST === 'mysql' && process.env.MYSQLHOST) {
-  pool.options.host = process.env.MYSQLHOST;
-  console.log('Using MySQL host for DB_HOST:', process.env.MYSQLHOST);
-}
 
 async function initDB() {
   let connection;
