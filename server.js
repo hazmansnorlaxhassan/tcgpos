@@ -13,6 +13,7 @@ const { authenticateToken, isAdmin, isSalespersonOrAdmin, JWT_SECRET } = require
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+
 // Enable CORS and JSON parsing
 app.use(cors());
 app.use(express.json());
@@ -378,7 +379,7 @@ app.post('/api/sales', authenticateToken, isSalespersonOrAdmin, async (req, res)
     // Calculate prices and discounts
     const subtotal = card.price * quantity;
     let finalDiscountValue = 0;
-    
+
     const discType = discount_type || 'none';
     const discVal = discount_value ? parseFloat(discount_value) : 0;
 
@@ -451,7 +452,7 @@ app.get('/api/sales/report', authenticateToken, isSalespersonOrAdmin, async (req
 
   try {
     const [sales] = await pool.query(query, params);
-    
+
     // Compute totals
     let totalRevenue = 0;
     let totalItemsSold = 0;

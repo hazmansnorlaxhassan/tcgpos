@@ -16,10 +16,11 @@ require('dotenv').config();
 
 
 const pool = mysql.createPool({
-  host: process.env.MYSQLHOST,
-  user: process.env.MYSQLUSER,
-  password: process.env.MYSQLPASSWORD,
-  database: process.env.MYSQLDATABASE,
+  host: process.env.MYSQLHOST || 'thomas.proxy.rlwy.net',
+  user: process.env.MYSQLUSER || 'root',
+  port: parseInt(process.env.MYSQLPORT, 10) || 59394,
+  password: process.env.MYSQLPASSWORD || 'oZCdRYYavXImuWFpjSQAJxsjYsUszgpO',
+  database: process.env.MYSQLDATABASE || 'railway',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
@@ -32,17 +33,18 @@ async function initDB() {
     // Connect without a database first to ensure the database exists
     connection = await mysql.createConnection({
       //host: process.env.DB_HOST || '127.0.0.1',
-      host: process.env.MYSQLHOST,
+      host: process.env.MYSQLHOST || 'thomas.proxy.rlwy.net',
       //user: process.env.DB_USER || 'root',
-      user: process.env.MYSQLUSER,
+      user: process.env.MYSQLUSER || 'root',
       //password: process.env.DB_PASSWORD || ''
-      password: process.env.MYSQLPASSWORD,
+      password: process.env.MYSQLPASSWORD || 'oZCdRYYavXImuWFpjSQAJxsjYsUszgpO',
+      port: process.env.MYSQLPORT || 59394,
 
     });
 
     // Create database if not exists
     //await connection.query(`CREATE DATABASE IF NOT EXISTS \`${process.env.DB_NAME || 'tcg_pos'}\``);
-    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${process.env.MYSQLDATABASE}\``);
+    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${process.env.MYSQLDATABASE || 'railway'}\``);
     await connection.end();
 
     // Now initialize schema using the pool
