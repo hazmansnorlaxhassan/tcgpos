@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AETHERIS // TCG Inventory & POS</title>
+  
+  <!-- Modern Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Core Design System CSS -->
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- html5-qrcode for barcode / QR scanner via camera -->
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+</head>
+<body class="dark-theme">
+  
+  <!-- BACKGROUND GRADIENT BLURS -->
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <!-- AUTHENTICATION CONTAINER (LOGIN SCREEN) -->
+  <div id="auth-container" class="auth-wrapper glass-panel">
+    <div class="auth-header">
+      <div class="logo">
+        <i class="fa-solid fa-cube text-gradient"></i>
+        <span>AETHERIS</span>
+      </div>
+      <h2>Welcome Back</h2>
+      <p>Sign in to access inventory & POS terminal</p>
+    </div>
+    
+    <form id="login-form">
+      <div class="form-group">
+        <label for="login-email"><i class="fa-solid fa-envelope"></i> Email Address</label>
+        <input type="email" id="login-email" required placeholder="admin@tcg.com">
+      </div>
+      <div class="form-group">
+        <label for="login-password"><i class="fa-solid fa-lock"></i> Password</label>
+        <div class="password-input-wrapper">
+          <input type="password" id="login-password" required placeholder="••••••••">
+        </div>
+      </div>
+      <div id="login-error" class="error-banner hidden">
+        <i class="fa-solid fa-circle-exclamation"></i> <span class="error-msg"></span>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">
+        Sign In <i class="fa-solid fa-right-to-bracket"></i>
+      </button>
+    </form>
+  </div>
+
+  <!-- SIDEBAR OVERLAY for mobile -->  
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- MAIN APP CONTAINER (HIDDEN UNTIL LOGGED IN) -->
+  <div id="app-container" class="app-layout hidden">
+    
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar glass-panel">
+      <div class="sidebar-brand">
+        <i class="fa-solid fa-cube text-gradient"></i>
+        <div class="brand-details">
+          <span class="brand-name">AETHERIS</span>
+          <span class="brand-sub">TCG SYSTEM</span>
+        </div>
+      </div>
+
+      <div class="user-profile">
+        <div class="avatar"><i class="fa-solid fa-user-shield" id="profile-role-icon"></i></div>
+        <div class="user-details">
+          <div class="username" id="profile-username">John Doe</div>
+          <div class="badge" id="profile-role">Admin</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-view="inventory-view">
+          <i class="fa-solid fa-boxes-stacked"></i> <span>Inventory</span>
+        </a>
+        <a href="#" class="nav-item" data-view="pos-view">
+          <i class="fa-solid fa-cash-register"></i> <span>POS Scan</span>
+        </a>
+        <a href="#" class="nav-item" data-view="reports-view">
+          <i class="fa-solid fa-chart-line"></i> <span>Sales History</span>
+        </a>
+        <a href="#" class="nav-item admin-only" data-view="users-view">
+          <i class="fa-solid fa-users-gear"></i> <span>Salespersons</span>
+        </a>
+        <a href="#" class="nav-item" data-view="sticker-view">
+          <i class="fa-solid fa-print"></i> <span>Sticker Creator</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button id="logout-btn" class="btn btn-danger-outline btn-block">
+          <i class="fa-solid fa-sign-out-alt"></i> <span>Log Out</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- CONTENT DISPLAY VIEWPORT -->
+    <main class="content-viewport">
+      
+      <!-- TOP STATUS HEADER -->
+      <header class="top-header">
+        <div class="header-left">
+          <button class="hamburger-btn" id="hamburger-btn" aria-label="Toggle navigation">
+            <span></span><span></span><span></span>
+          </button>
+          <h1 id="view-title">Cards Inventory</h1>
+        </div>
+        <div class="header-actions">
+          <span class="live-clock"><i class="fa-regular fa-clock"></i> <span id="current-time">12:00:00 PM</span></span>
+        </div>
+      </header>
+
+      <!-- 1. INVENTORY VIEW -->
+      <section id="inventory-view" class="app-view">
+        <div class="control-bar">
+          <div class="search-box glass-panel">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="inventory-search" placeholder="Search by name or number...">
+          </div>
+          <div class="filter-actions">
+            <button class="btn btn-secondary" id="btn-toggle-filters">
+              <i class="fa-solid fa-filter"></i> Filters
+            </button>
+            <button class="btn btn-primary admin-only" id="btn-add-card">
+              <i class="fa-solid fa-plus"></i> Add Card
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Drawer (Collapsible) -->
+        <div class="filter-drawer glass-panel hidden" id="filter-drawer">
+          <div class="filter-grid">
+            <div class="form-group">
+              <label>Year Made</label>
+              <input type="number" id="filter-year" placeholder="e.g. 1999">
+            </div>
+            <div class="form-group">
+              <label>Rarity</label>
+              <select id="filter-rarity">
+                <option value="">All Rarities</option>
+                <option value="Common">Common</option>
+                <option value="Uncommon">Uncommon</option>
+                <option value="Rare">Rare</option>
+                <option value="Holo Rare">Holo Rare</option>
+                <option value="Ultra Rare">Ultra Rare</option>
+                <option value="Secret Rare">Secret Rare</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Language</label>
+              <select id="filter-language">
+                <option value="">All Languages</option>
+                <option value="English">English</option>
+                <option value="Japanese">Japanese</option>
+                <option value="Korean">Korean</option>
+                <option value="Spanish">Spanish</option>
+                <option value="French">French</option>
+                <option value="German">German</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Condition</label>
+              <select id="filter-condition">
+                <option value="">All Conditions</option>
+                <option value="Mint (M)">Mint (M)</option>
+                <option value="Near Mint (NM)">Near Mint (NM)</option>
+                <option value="Lightly Played (LP)">Lightly Played (LP)</option>
+                <option value="Moderately Played (MP)">Moderately Played (MP)</option>
+                <option value="Heavily Played (HP)">Heavily Played (HP)</option>
+                <option value="Damaged (DMG)">Damaged (DMG)</option>
+              </select>
+            </div>
+          </div>
+          <div class="drawer-actions">
+            <button class="btn btn-secondary-outline" id="btn-clear-filters">Reset</button>
+            <button class="btn btn-primary" id="btn-apply-filters">Apply Filters</button>
+          </div>
+        </div>
+
+        <!-- Cards Inventory Grid -->
+        <div class="cards-grid" id="cards-container">
+          <!-- Dynamically populated card panels -->
+        </div>
+      </section>
+
+      <!-- 2. POINT OF SALES (POS) VIEW -->
+      <section id="pos-view" class="app-view hidden">
+        <div class="pos-layout">
+          <!-- POS LEFT: SCANNER AND DETAILS -->
+          <div class="pos-scan-column">
+            <div class="glass-panel scanner-card">
+              <div class="card-header">
+                <h3><i class="fa-solid fa-qrcode"></i> QR Camera Scanner</h3>
+                <span class="status-indicator live" id="scanner-status">Standby</span>
+              </div>
+              <div class="scanner-viewport-wrapper">
+                <div id="reader" style="width:100%; max-width:400px; margin:auto;"></div>
+              </div>
+              <div class="scanner-controls">
+                <button class="btn btn-secondary-outline" id="btn-toggle-scanner">
+                  <i class="fa-solid fa-camera"></i> Start Camera Scan
+                </button>
+                <div class="manual-input-row">
+                  <input type="text" id="manual-scan-input" placeholder="Manual Enter Card ID">
+                  <button class="btn btn-primary" id="btn-manual-scan"><i class="fa-solid fa-magnifying-glass"></i></button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Scanned Card Preview -->
+            <div class="glass-panel card-preview-panel hidden" id="pos-card-preview">
+              <h3>Scanned Card</h3>
+              <div class="scanned-card-detail">
+                <div class="scanned-card-image">
+                  <img id="preview-image" src="" alt="Card">
+                </div>
+                <div class="scanned-card-info">
+                  <h4 id="preview-name">Base Set Charizard</h4>
+                  <div class="details-row">
+                    <span>Year: <strong id="preview-year">1999</strong></span>
+                    <span>No: <strong id="preview-number">4/102</strong></span>
+                  </div>
+                  <div class="details-row">
+                    <span>Rarity: <strong id="preview-rarity">Rare</strong></span>
+                    <span>Cond: <strong id="preview-condition">NM</strong></span>
+                  </div>
+                  <div class="details-row">
+                    <span>Lang: <strong id="preview-language">English</strong></span>
+                    <span>Stock: <strong id="preview-stock">5</strong></span>
+                  </div>
+                  <div class="price-tag text-gradient" id="preview-price">$350.00</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- POS RIGHT: BASKET AND CHECKOUT -->
+          <div class="pos-basket-column">
+            <div class="glass-panel basket-card">
+              <h3><i class="fa-solid fa-shopping-cart"></i> Sales Register</h3>
+              <div class="basket-items-wrapper" id="basket-items">
+                <div class="empty-basket-message">
+                  <i class="fa-solid fa-qrcode fa-3x mb-3 text-faded"></i>
+                  <p>Scan a QR code to register a card for sale</p>
+                </div>
+              </div>
+
+              <!-- Cart Summary -->
+              <div class="basket-summary">
+                <div class="summary-row">
+                  <span>Subtotal</span>
+                  <span id="pos-subtotal">$0.00</span>
+                </div>
+                
+                <!-- Discount Panel -->
+                <div class="discount-section">
+                  <label><i class="fa-solid fa-tag"></i> Apply Discount</label>
+                  <div class="discount-inputs">
+                    <select id="discount-type">
+                      <option value="none">No Discount</option>
+                      <option value="percentage">Percentage (%)</option>
+                      <option value="fixed">Fixed Amount ($)</option>
+                    </select>
+                    <input type="number" id="discount-value" value="0" min="0" step="0.01" disabled>
+                  </div>
+                </div>
+
+                <hr class="summary-divider">
+
+                <div class="summary-row total">
+                  <span>Total Due</span>
+                  <span id="pos-total" class="text-gradient">$0.00</span>
+                </div>
+
+                <button class="btn btn-primary btn-block btn-large mt-3" id="btn-checkout" disabled>
+                  Record Sale <i class="fa-solid fa-cash-register ml-2"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. REPORTS VIEW -->
+      <section id="reports-view" class="app-view hidden">
+        <div class="reports-summary-cards">
+          <div class="report-stat-card glass-panel">
+            <i class="fa-solid fa-hand-holding-dollar text-primary"></i>
+            <div>
+              <div class="stat-val text-gradient" id="report-total-revenue">$0.00</div>
+              <div class="stat-label">Total Revenue</div>
+            </div>
+          </div>
+          <div class="report-stat-card glass-panel">
+            <i class="fa-solid fa-ticket text-secondary"></i>
+            <div>
+              <div class="stat-val text-gradient" id="report-total-sold">0</div>
+              <div class="stat-label">Cards Sold</div>
+            </div>
+          </div>
+          <div class="report-stat-card glass-panel">
+            <i class="fa-solid fa-receipt text-success"></i>
+            <div>
+              <div class="stat-val text-gradient" id="report-sales-count">0</div>
+              <div class="stat-label">Sales Transactions</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-panel table-card mt-4">
+          <h3>Sales Transactions Log</h3>
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Sale ID</th>
+                  <th>Card Name</th>
+                  <th>Quantity</th>
+                  <th>Base Price</th>
+                  <th>Discount</th>
+                  <th>Total Price</th>
+                  <th>Salesperson</th>
+                  <th>Date & Time</th>
+                </tr>
+              </thead>
+              <tbody id="sales-history-tbody">
+                <!-- Dynamically filled -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. USERS MANAGEMENT VIEW -->
+      <section id="users-view" class="app-view admin-only hidden">
+        <div class="users-layout">
+          <!-- Add Salesperson -->
+          <div class="glass-panel user-creation-form">
+            <h3><i class="fa-solid fa-user-plus"></i> Register Salesperson</h3>
+            <form id="register-salesperson-form" class="mt-3">
+              <div class="form-group">
+                <label for="reg-name">Full Name</label>
+                <input type="text" id="reg-name" required placeholder="e.g. Alex Mercer">
+              </div>
+              <div class="form-group">
+                <label for="reg-email">Email Address</label>
+                <input type="email" id="reg-email" required placeholder="e.g. alex@tcg.com">
+              </div>
+              <div class="form-group">
+                <label for="reg-password">Password</label>
+                <input type="password" id="reg-password" required placeholder="Password">
+              </div>
+              <button type="submit" class="btn btn-primary btn-block">Add Salesperson</button>
+            </form>
+          </div>
+
+          <!-- Salespersons List -->
+          <div class="glass-panel users-list-panel">
+            <h3>Registered Salespersons</h3>
+            <div class="salespersons-list" id="salespersons-container">
+              <!-- Dynamically populated list -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. STICKER VIEW -->
+      <section id="sticker-view" class="app-view hidden">
+        <div class="sticker-designer-layout">
+          <!-- Selection panel -->
+          <div class="glass-panel sticker-controls-card">
+            <h3>Sticker Customizer</h3>
+            <div class="form-group mt-3">
+              <label for="sticker-card-select">Choose Card</label>
+              <select id="sticker-card-select">
+                <option value="">-- Select a Card --</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="sticker-size">Label Dimension</label>
+              <select id="sticker-size">
+                <option value="small">Small Label (30x15mm)</option>
+                <option value="medium" selected>Standard Sticker (50x25mm)</option>
+                <option value="large">Large Tag (70x35mm)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="sticker-quantity">Print Copies</label>
+              <input type="number" id="sticker-quantity" value="1" min="1" max="100">
+            </div>
+            
+            <button class="btn btn-primary btn-block mt-3" id="btn-print-stickers" disabled>
+              <i class="fa-solid fa-print"></i> Send to Printer
+            </button>
+          </div>
+
+          <!-- Preview panel -->
+          <div class="glass-panel sticker-preview-card">
+            <h3>Sticker Template Preview</h3>
+            <div class="sticker-sheet-preview" id="sticker-sheet-container">
+              <div class="sticker-placeholder-text">
+                <i class="fa-solid fa-tags fa-3x mb-3 text-faded"></i>
+                <p>Select a card from the left panel to render its sticker preview</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ADD / EDIT CARD DIALOG MODAL (ADMIN ONLY) -->
+  <div class="modal-backdrop hidden" id="card-modal">
+    <div class="modal-panel glass-panel">
+      <div class="modal-header">
+        <h3 id="modal-title">Add New Trading Card</h3>
+        <button class="btn-close" id="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="card-form">
+        <input type="hidden" id="card-form-id">
+        <div class="modal-body">
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="card-name">Card Name</label>
+              <input type="text" id="card-name" required placeholder="e.g. Black Luster Soldier">
+            </div>
+            <div class="form-group">
+              <label for="card-year">Year Made</label>
+              <input type="number" id="card-year" required placeholder="e.g. 2004">
+            </div>
+          </div>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="card-number">Card Number</label>
+              <input type="text" id="card-number" required placeholder="e.g. IOC-025">
+            </div>
+            <div class="form-group">
+              <label for="card-price">Price ($)</label>
+              <input type="number" id="card-price" step="0.01" min="0.01" required placeholder="e.g. 79.99">
+            </div>
+          </div>
+          <div class="form-row-3">
+            <div class="form-group">
+              <label for="card-rarity">Rarity</label>
+              <select id="card-rarity" required>
+                <option value="Common">Common</option>
+                <option value="Uncommon">Uncommon</option>
+                <option value="Rare">Rare</option>
+                <option value="Holo Rare">Holo Rare</option>
+                <option value="Ultra Rare">Ultra Rare</option>
+                <option value="Secret Rare">Secret Rare</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="card-language">Language</label>
+              <select id="card-language" required>
+                <option value="English">English</option>
+                <option value="Japanese">Japanese</option>
+                <option value="Korean">Korean</option>
+                <option value="Spanish">Spanish</option>
+                <option value="French">French</option>
+                <option value="German">German</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="card-condition">Condition</label>
+              <select id="card-condition" required>
+                <option value="Mint (M)">Mint (M)</option>
+                <option value="Near Mint (NM)" selected>Near Mint (NM)</option>
+                <option value="Lightly Played (LP)">Lightly Played (LP)</option>
+                <option value="Moderately Played (MP)">Moderately Played (MP)</option>
+                <option value="Heavily Played (HP)">Heavily Played (HP)</option>
+                <option value="Damaged (DMG)">Damaged (DMG)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="card-quantity">Quantity</label>
+              <input type="number" id="card-quantity" value="1" min="0" required>
+            </div>
+            <div class="form-group">
+              <label for="card-image">Card Image</label>
+              <input type="file" id="card-image" accept="image/*">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary-outline" id="btn-cancel-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Card</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main client app module -->
+  <script src="app.js"></script>
+</body>
+</html>
