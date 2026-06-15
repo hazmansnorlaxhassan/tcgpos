@@ -1,26 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AETHERIS // TCG Inventory & POS</title>
-  
+  <title>TCG Inventory & POS</title>
+
   <!-- Modern Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
+
   <!-- Core Design System CSS -->
   <link rel="stylesheet" href="style.css">
-  
+
   <!-- html5-qrcode for barcode / QR scanner via camera -->
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 </head>
+
 <body class="dark-theme">
-  
+
   <!-- BACKGROUND GRADIENT BLURS -->
   <div class="blob blob-1"></div>
   <div class="blob blob-2"></div>
@@ -31,12 +35,12 @@
     <div class="auth-header">
       <div class="logo">
         <i class="fa-solid fa-cube text-gradient"></i>
-        <span>AETHERIS</span>
+        <span>TCGPOS</span>
       </div>
       <h2>Welcome Back</h2>
       <p>Sign in to access inventory & POS terminal</p>
     </div>
-    
+
     <form id="login-form">
       <div class="form-group">
         <label for="login-email"><i class="fa-solid fa-envelope"></i> Email Address</label>
@@ -57,12 +61,12 @@
     </form>
   </div>
 
-  <!-- SIDEBAR OVERLAY for mobile -->  
+  <!-- SIDEBAR OVERLAY for mobile -->
   <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
   <!-- MAIN APP CONTAINER (HIDDEN UNTIL LOGGED IN) -->
   <div id="app-container" class="app-layout hidden">
-    
+
     <!-- SIDEBAR NAVIGATION -->
     <aside class="sidebar glass-panel">
       <div class="sidebar-brand">
@@ -108,7 +112,7 @@
 
     <!-- CONTENT DISPLAY VIEWPORT -->
     <main class="content-viewport">
-      
+
       <!-- TOP STATUS HEADER -->
       <header class="top-header">
         <div class="header-left">
@@ -214,7 +218,8 @@
                 </button>
                 <div class="manual-input-row">
                   <input type="text" id="manual-scan-input" placeholder="Manual Enter Card ID">
-                  <button class="btn btn-primary" id="btn-manual-scan"><i class="fa-solid fa-magnifying-glass"></i></button>
+                  <button class="btn btn-primary" id="btn-manual-scan"><i
+                      class="fa-solid fa-magnifying-glass"></i></button>
                 </div>
               </div>
             </div>
@@ -263,7 +268,7 @@
                   <span>Subtotal</span>
                   <span id="pos-subtotal">$0.00</span>
                 </div>
-                
+
                 <!-- Discount Panel -->
                 <div class="discount-section">
                   <label><i class="fa-solid fa-tag"></i> Apply Discount</label>
@@ -400,7 +405,7 @@
               <label for="sticker-quantity">Print Copies</label>
               <input type="number" id="sticker-quantity" value="1" min="1" max="100">
             </div>
-            
+
             <button class="btn btn-primary btn-block mt-3" id="btn-print-stickers" disabled>
               <i class="fa-solid fa-print"></i> Send to Printer
             </button>
@@ -509,4 +514,5 @@
   <!-- Main client app module -->
   <script src="app.js"></script>
 </body>
+
 </html>
