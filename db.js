@@ -14,25 +14,39 @@ const pool = mysql.createPool({
   queueLimit: 0
 });
 
+// Fallback for Railway when DB_HOST is missing but Railway provides it in env
+if (process.env.DB_HOST === 'mysql' && process.env.RAILWAY_PRIVATE_DOMAIN) {
+  pool.options.host = process.env.RAILWAY_PRIVATE_DOMAIN;
+  console.log('Using Railway private domain for DB_HOST:', process.env.RAILWAY_PRIVATE_DOMAIN);
+} else if (process.env.DB_HOST === 'mysql' && process.env.MYSQLHOST) {
+  pool.options.host = process.env.MYSQLHOST;
+  console.log('Using MySQL host for DB_HOST:', process.env.MYSQLHOST);
+}
+
 async function initDB() {
   let connection;
   try {
     // Connect without a database first to ensure the database exists
     connection = await mysql.createConnection({
-      host: process.env.DB_HOST || '127.0.0.1',
-      user: process.env.DB_USER || 'root',
-      password: process.env.DB_PASSWORD || ''
+      //host: process.env.DB_HOST || '127.0.0.1',
+      host: process.env.MYSQLHOST,
+      //user: process.env.DB_USER || 'root',
+      user: process.env.MYSQLUSER,
+      //password: process.env.DB_PASSWORD || ''
+      password: process.env.MYSQLPASSWORD,
+
     });
 
     // Create database if not exists
-    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${process.env.DB_NAME || 'tcg_pos'}\``);
+    //await connection.query(`CREATE DATABASE IF NOT EXISTS \`${process.env.DB_NAME || 'tcg_pos'}\``);
+    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${process.env.MYSQLDATABASE}\``);
     await connection.end();
 
     // Now initialize schema using the pool
     const schemaPath = path.join(__dirname, 'schema.sql');
     if (fs.existsSync(schemaPath)) {
       const schemaSql = fs.readFileSync(schemaPath, 'utf8');
-      
+
       // Execute the schema statements one by one (splitting on semicolons)
       // Note: We need a connection from the pool to execute
       const conn = await pool.getConnection();
