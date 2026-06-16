@@ -69,6 +69,7 @@ const posSubtotalEl = document.getElementById('pos-subtotal');
 const discountTypeSelect = document.getElementById('discount-type');
 const discountValueInput = document.getElementById('discount-value');
 const posTotalEl = document.getElementById('pos-total');
+const paymentMethodSelect = document.getElementById('payment-method');
 const btnCheckout = document.getElementById('btn-checkout');
 
 // Scanned Card Preview DOM elements
@@ -184,7 +185,10 @@ function setupEventListeners() {
     }
     updateBasketSummary();
   });
+
+
   discountValueInput.addEventListener('input', updateBasketSummary);
+  paymentMethodSelect.addEventListener('input', updateBasketSummary);
   btnCheckout.addEventListener('click', handleCheckout);
 
   // Register Salesperson form
@@ -365,16 +369,16 @@ async function loadInventory() {
   if (rarity) params.push(`rarity=${encodeURIComponent(rarity)}`);
   if (language) params.push(`language=${encodeURIComponent(language)}`);
   if (condition) params.push(`condition=${encodeURIComponent(condition)}`);
-  
+
   url += params.join('&');
 
   try {
     const res = await fetch(url, {
       headers: { 'Authorization': `Bearer ${state.token}` }
     });
-    
+
     if (!res.ok) throw new Error('Failed to load inventory.');
-    
+
     const cards = await res.json();
     state.inventory = cards;
     renderInventory();
@@ -420,10 +424,10 @@ function renderInventory() {
       <div class="card-actions-row">
         ${state.user.role === 'admin' ? `
           <button class="btn btn-secondary-outline" onclick="openCardModal('edit', ${card.id})"><i class="fa-solid fa-edit"></i> Edit</button>
-          <button class="btn btn-danger-outline" onclick="deleteCard(${card.id})"><i class="fa-solid fa-trash"></i></button>
+          <button class="btn btn-danger-outline" onclick="deleteCard(${card.id})"><i class="fa-solid fa-trash"></i>Delete</button>
         ` : ''}
         <button class="btn btn-primary" onclick="addCardToBasketDirectly(${card.id})" ${card.quantity === 0 ? 'disabled' : ''}>
-          <i class="fa-solid fa-shopping-basket"></i> Sell
+          <i class="fa-solid fa-shopping-basket"></i> ${card.quantity === 0 ? 'Out of Stock' : 'Sell'}
         </button>
       </div>
     `;
@@ -443,7 +447,7 @@ function openCardModal(mode, cardId = null) {
     modalTitle.textContent = 'Edit Trading Card';
     cardFormId.value = cardId;
     const card = state.inventory.find(c => c.id === cardId);
-    
+
     if (card) {
       document.getElementById('card-name').value = card.name;
       document.getElementById('card-year').value = card.year_made;
@@ -548,7 +552,7 @@ function toggleQRScanner() {
 
 function startQRScanner() {
   state.html5QrScanner = new Html5Qrcode("reader");
-  
+
   btnToggleScanner.innerHTML = '<i class="fa-solid fa-camera-slash"></i> Stop Camera Scan';
   scannerStatus.textContent = 'Scanning...';
   scannerStatus.style.color = '#915032';
@@ -585,7 +589,7 @@ function stopQRScanner() {
 function onQrScanSuccess(decodedText, decodedResult) {
   // When a QR is scanned, the decodedText is the ID of the card
   console.log(`QR Scanned successfully: ${decodedText}`);
-  
+
   // Play a brief beep alert or update status
   scannerStatus.textContent = 'Scanned!';
   setTimeout(() => {
@@ -626,7 +630,7 @@ async function lookupAndProcessCardId(cardId) {
 
 function displayCardPreview(card) {
   posCardPreview.classList.remove('hidden');
-  
+
   previewImage.src = card.image_url ? `${API_BASE}${card.image_url}` : 'https://placehold.co/250x350/161a23/ffffff?text=No+Image';
   previewName.textContent = card.name;
   previewYear.textContent = card.year_made;
@@ -733,6 +737,7 @@ function updateBasketSummary() {
   posSubtotalEl.textContent = `$${subtotal.toFixed(2)}`;
 
   const discountType = discountTypeSelect.value;
+
   const discountVal = parseFloat(discountValueInput.value) || 0;
   let totalDiscount = 0;
 
@@ -750,7 +755,10 @@ async function handleCheckout() {
   if (state.basket.length === 0) return;
 
   const discountType = discountTypeSelect.value;
+
   const discountVal = parseFloat(discountValueInput.value) || 0;
+
+  const paymentMethod = paymentMethodSelect.value;
 
   btnCheckout.disabled = true;
   btnCheckout.textContent = 'Recording Sale...';
@@ -783,6 +791,10 @@ async function handleCheckout() {
         distributedVal = (itemSubtotal / subtotal) * discountVal;
       }
 
+
+
+
+
       const res = await fetch(`${API_BASE}/api/sales`, {
         method: 'POST',
         headers: {
@@ -793,7 +805,9 @@ async function handleCheckout() {
           card_id: item.card.id,
           quantity: item.quantity,
           discount_type: distributedType,
-          discount_value: distributedVal
+          discount_value: distributedVal,
+          payment_method: paymentMethod,
+
         })
       });
 
@@ -802,11 +816,11 @@ async function handleCheckout() {
     }
 
     alert('Checkout successful! Sale recorded.');
-    
+
     // Clear Basket
     state.basket = [];
     renderBasket();
-    
+
     // Clear Preview
     posCardPreview.classList.add('hidden');
     discountTypeSelect.value = 'none';
@@ -835,7 +849,7 @@ async function loadReports() {
     if (!res.ok) throw new Error('Failed to fetch reports.');
 
     const data = await res.json();
-    
+
     // Set statistics
     reportTotalRevenue.textContent = `$${parseFloat(data.summary.totalRevenue).toFixed(2)}`;
     reportTotalSold.textContent = data.summary.totalItemsSold;
@@ -843,7 +857,7 @@ async function loadReports() {
 
     // Populate log table
     salesHistoryTbody.innerHTML = '';
-    
+
     if (data.sales.length === 0) {
       salesHistoryTbody.innerHTML = '<tr><td colspan="8" style="text-align:center;">No transaction logs available.</td></tr>';
       return;
@@ -851,11 +865,11 @@ async function loadReports() {
 
     data.sales.forEach(sale => {
       const tr = document.createElement('tr');
-      
+
       const date = new Date(sale.sale_timestamp).toLocaleString();
-      const discText = sale.discount_type === 'none' ? '-' : 
-                       sale.discount_type === 'percentage' ? `${sale.discount_value}%` : 
-                       `$${parseFloat(sale.discount_value).toFixed(2)}`;
+      const discText = sale.discount_type === 'none' ? '-' :
+        sale.discount_type === 'percentage' ? `${sale.discount_value}%` :
+          `$${parseFloat(sale.discount_value).toFixed(2)}`;
 
       tr.innerHTML = `
         <td>#${sale.sale_id}</td>
@@ -864,6 +878,7 @@ async function loadReports() {
         <td>$${parseFloat(sale.base_price).toFixed(2)}</td>
         <td>${discText}</td>
         <td class="text-gradient" style="font-weight:700;">$${parseFloat(sale.total_price).toFixed(2)}</td>
+        <td>${sale.payment_method}</td>
         <td>${sale.salesperson_name}</td>
         <td>${date}</td>
       `;
@@ -979,9 +994,9 @@ async function loadStickersDropdown() {
     const res = await fetch(`${API_BASE}/api/cards`, {
       headers: { 'Authorization': `Bearer ${state.token}` }
     });
-    
+
     if (!res.ok) throw new Error();
-    
+
     const cards = await res.json();
     state.inventory = cards;
 

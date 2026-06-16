@@ -350,7 +350,7 @@ app.get('/api/cards/:id/qr', async (req, res) => {
 
 // Record a sale (Salesperson or Admin only)
 app.post('/api/sales', authenticateToken, isSalespersonOrAdmin, async (req, res) => {
-  const { card_id, quantity, discount_type, discount_value } = req.body;
+  const { card_id, quantity, discount_type, discount_value, payment_method } = req.body;
   const salespersonId = req.user.id;
 
   if (!card_id || !quantity) {
@@ -389,6 +389,9 @@ app.post('/api/sales', authenticateToken, isSalespersonOrAdmin, async (req, res)
       finalDiscountValue = discVal;
     }
 
+    const paymentMethod = payment_method;
+
+
     const finalPrice = Math.max(0, subtotal - finalDiscountValue);
 
     // Update stock
@@ -396,9 +399,9 @@ app.post('/api/sales', authenticateToken, isSalespersonOrAdmin, async (req, res)
 
     // Record sales transaction
     const [saleResult] = await conn.query(
-      `INSERT INTO sales (card_id, salesperson_id, quantity, discount_type, discount_value, total_price) 
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [card_id, salespersonId, quantity, discType, discVal, finalPrice]
+      `INSERT INTO sales (card_id, salesperson_id, quantity, discount_type, discount_value, total_price, payment_method) 
+       VALUES (?, ?, ?, ?, ?, ?,?)`,
+      [card_id, salespersonId, quantity, discType, discVal, finalPrice, paymentMethod]
     );
 
     await conn.commit();
@@ -421,6 +424,7 @@ app.post('/api/sales', authenticateToken, isSalespersonOrAdmin, async (req, res)
 
 // Sales reports endpoint
 app.get('/api/sales/report', authenticateToken, isSalespersonOrAdmin, async (req, res) => {
+
   const role = req.user.role;
   const userId = req.user.id;
 
@@ -431,6 +435,7 @@ app.get('/api/sales/report', authenticateToken, isSalespersonOrAdmin, async (req
       s.discount_type,
       s.discount_value,
       s.total_price,
+      s.payment_method,
       s.sale_timestamp,
       c.name as card_name,
       c.card_number,

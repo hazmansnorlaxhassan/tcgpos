@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS tcg_pos;
-USE tcg_pos;
+-- CREATE DATABASE IF NOT EXISTS tcg_pos;
+-- USE tcg_pos;
 
 -- Users table (includes admin and salesperson roles)
 CREATE TABLE IF NOT EXISTS users (
@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS sales (
   discount_type ENUM('none', 'percentage', 'fixed') NOT NULL DEFAULT 'none',
   discount_value DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
   total_price DECIMAL(10, 2) NOT NULL,
+  payment_method ENUM('cash', 'transfer', 'qr') NOT NULL DEFAULT 'cash',
   sale_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (card_id) REFERENCES cards(id) ON DELETE CASCADE,
   FOREIGN KEY (salesperson_id) REFERENCES users(id) ON DELETE CASCADE

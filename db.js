@@ -15,12 +15,24 @@ require('dotenv').config();
 });*/
 
 
-const pool = mysql.createPool({
+/*const pool = mysql.createPool({
   host: process.env.MYSQLHOST || 'thomas.proxy.rlwy.net',
   user: process.env.MYSQLUSER || 'root',
   port: parseInt(process.env.MYSQLPORT, 10) || 59394,
   password: process.env.MYSQLPASSWORD || 'oZCdRYYavXImuWFpjSQAJxsjYsUszgpO',
   database: process.env.MYSQLDATABASE || 'railway',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});*/
+
+
+const pool = mysql.createPool({
+  host: process.env.Host || "sql12.freesqldatabase.com",
+  user: process.env.Database_user || "sql12830618",
+  port: process.env.Port_number || 3306,
+  password: process.env.Database_password || "akWdDrgGyp",
+  database: process.env.Database_name || "sql12830618",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
@@ -33,18 +45,23 @@ async function initDB() {
     // Connect without a database first to ensure the database exists
     connection = await mysql.createConnection({
       //host: process.env.DB_HOST || '127.0.0.1',
-      host: process.env.MYSQLHOST || 'thomas.proxy.rlwy.net',
+      //host: process.env.MYSQLHOST || 'thomas.proxy.rlwy.net',
+      host: process.env.Host || "sql12.freesqldatabase.com",
       //user: process.env.DB_USER || 'root',
-      user: process.env.MYSQLUSER || 'root',
+      //user: process.env.MYSQLUSER || 'root',
+      user: process.env.Database_user || "sql12830618",
       //password: process.env.DB_PASSWORD || ''
-      password: process.env.MYSQLPASSWORD || 'oZCdRYYavXImuWFpjSQAJxsjYsUszgpO',
-      port: process.env.MYSQLPORT || 59394,
+      //password: process.env.MYSQLPASSWORD || 'oZCdRYYavXImuWFpjSQAJxsjYsUszgpO',
+      password: process.env.Database_password || "akWdDrgGyp",
+      //port: process.env.MYSQLPORT || 59394,
+      port: process.env.Port_number || 3306,
 
     });
 
     // Create database if not exists
     //await connection.query(`CREATE DATABASE IF NOT EXISTS \`${process.env.DB_NAME || 'tcg_pos'}\``);
-    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${process.env.MYSQLDATABASE || 'railway'}\``);
+    //await connection.query(`CREATE DATABASE IF NOT EXISTS \`${process.env.MYSQLDATABASE || 'railway'}\``);
+    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${process.env.Database_name || 'sql12830618'}\``);
     await connection.end();
 
     // Now initialize schema using the pool
