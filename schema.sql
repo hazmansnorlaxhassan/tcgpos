@@ -15,7 +15,6 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS cards (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
-  year_made INT NOT NULL,
   card_number VARCHAR(50) NOT NULL,
   price DECIMAL(10, 2) NOT NULL,
   rarity VARCHAR(100) NOT NULL,
@@ -23,6 +22,7 @@ CREATE TABLE IF NOT EXISTS cards (
   quantity INT NOT NULL DEFAULT 0,
   card_condition VARCHAR(50) NOT NULL, -- e.g., Near Mint, Lightly Played, etc.
   image_url VARCHAR(255) DEFAULT NULL,
+  image_data LONGBLOB DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

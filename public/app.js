@@ -45,7 +45,7 @@ const filterDrawer = document.getElementById('filter-drawer');
 const btnApplyFilters = document.getElementById('btn-apply-filters');
 const btnClearFilters = document.getElementById('btn-clear-filters');
 const btnAddCard = document.getElementById('btn-add-card');
-const filterYear = document.getElementById('filter-year');
+//const filterYear = document.getElementById('filter-year');
 const filterRarity = document.getElementById('filter-rarity');
 const filterLanguage = document.getElementById('filter-language');
 const filterCondition = document.getElementById('filter-condition');
@@ -75,7 +75,7 @@ const btnCheckout = document.getElementById('btn-checkout');
 // Scanned Card Preview DOM elements
 const previewImage = document.getElementById('preview-image');
 const previewName = document.getElementById('preview-name');
-const previewYear = document.getElementById('preview-year');
+//const previewYear = document.getElementById('preview-year');
 const previewNumber = document.getElementById('preview-number');
 const previewRarity = document.getElementById('preview-rarity');
 const previewCondition = document.getElementById('preview-condition');
@@ -147,7 +147,7 @@ function setupEventListeners() {
     loadInventory();
   });
   btnClearFilters.addEventListener('click', () => {
-    filterYear.value = '';
+    //filterYear.value = '';
     filterRarity.value = '';
     filterLanguage.value = '';
     filterCondition.value = '';
@@ -357,7 +357,7 @@ function switchView(viewId) {
 
 async function loadInventory() {
   const search = inventorySearch.value.trim();
-  const year = filterYear.value;
+  //const year = filterYear.value;
   const rarity = filterRarity.value;
   const language = filterLanguage.value;
   const condition = filterCondition.value;
@@ -365,7 +365,7 @@ async function loadInventory() {
   let url = `${API_BASE}/api/cards?`;
   const params = [];
   if (search) params.push(`search=${encodeURIComponent(search)}`);
-  if (year) params.push(`year=${year}`);
+  //if (year) params.push(`year=${year}`);
   if (rarity) params.push(`rarity=${encodeURIComponent(rarity)}`);
   if (language) params.push(`language=${encodeURIComponent(language)}`);
   if (condition) params.push(`condition=${encodeURIComponent(condition)}`);
@@ -403,7 +403,7 @@ function renderInventory() {
     const cardPanel = document.createElement('div');
     cardPanel.className = 'card-panel glass-panel';
 
-    const cardImg = card.image_url ? `${API_BASE}${card.image_url}` : 'https://placehold.co/250x350/161a23/ffffff?text=No+Image';
+    const cardImg = `${API_BASE}/api/cards/${card.id}/image`;
 
     cardPanel.innerHTML = `
       <div class="card-image-box">
@@ -415,10 +415,11 @@ function renderInventory() {
         <span class="card-price text-gradient">$${parseFloat(card.price).toFixed(2)}</span>
       </div>
       <div class="card-spec-grid">
-        <div class="card-spec-item">Year: <strong>${card.year_made}</strong></div>
+        <div class="card-spec-item">Name:ID <strong>${card.id}</strong></div>
         <div class="card-spec-item">No: <strong>${card.card_number}</strong></div>
         <div class="card-spec-item">Lang: <strong>${card.language}</strong></div>
         <div class="card-spec-item">Cond: <strong>${card.card_condition}</strong></div>
+        <div class="card-spec-item" >QR Code: <strong><img src="${API_BASE}/api/cards/${card.id}/qr" alt="QR" style="height: 70px; width:70px;"></strong></div>
         <div class="card-spec-item" style="grid-column: 1 / -1">Stock Qty: <strong class="${card.quantity === 0 ? 'text-danger' : ''}">${card.quantity}</strong></div>
       </div>
       <div class="card-actions-row">
@@ -450,7 +451,7 @@ function openCardModal(mode, cardId = null) {
 
     if (card) {
       document.getElementById('card-name').value = card.name;
-      document.getElementById('card-year').value = card.year_made;
+      //document.getElementById('card-year').value = card.year_made;
       document.getElementById('card-number').value = card.card_number;
       document.getElementById('card-price').value = card.price;
       document.getElementById('card-rarity').value = card.rarity;
@@ -472,7 +473,7 @@ async function handleCardSubmit(e) {
 
   const formData = new FormData();
   formData.append('name', document.getElementById('card-name').value.trim());
-  formData.append('year_made', document.getElementById('card-year').value);
+  //formData.append('year_made', document.getElementById('card-year').value);
   formData.append('card_number', document.getElementById('card-number').value.trim());
   formData.append('price', document.getElementById('card-price').value);
   formData.append('rarity', document.getElementById('card-rarity').value);
@@ -559,18 +560,25 @@ function startQRScanner() {
 
   const config = { fps: 10, qrbox: { width: 250, height: 250 } };
 
-  state.html5QrScanner.start(
-    { facingMode: "environment" },
-    config,
-    onQrScanSuccess,
-    onQrScanError
-  ).catch(err => {
-    console.error(err);
-    scannerStatus.textContent = 'Camera Error';
-    btnToggleScanner.innerHTML = '<i class="fa-solid fa-camera"></i> Start Camera Scan';
-    state.html5QrScanner = null;
-    alert('Could not start webcam scanner. Ensure you have given permissions.');
-  });
+  Html5Qrcode.getCameras().then(cameras => {
+      const rearCamera = cameras.find(c => /back|rear|environment/i.test(c.label)) || cameras[0];
+      const cameraConfig = rearCamera ? rearCamera.id : { facingMode: "environment", advanced: [{ focusMode: "continuous" }] };
+      state.html5QrScanner.start(cameraConfig, config, onQrScanSuccess, onQrScanError)
+        .catch(err => {
+          console.error(err);
+          scannerStatus.textContent = 'Camera Error';
+          btnToggleScanner.innerHTML = '<i class="fa-solid fa-camera"></i> Start Camera Scan';
+          state.html5QrScanner = null;
+          alert('Could not start webcam scanner. Ensure you have given permissions.');
+        });
+    })
+    .catch(err => {
+      console.error('Error accessing cameras', err);
+      scannerStatus.textContent = 'Camera Error';
+      btnToggleScanner.innerHTML = '<i class="fa-solid fa-camera"></i> Start Camera Scan';
+      state.html5QrScanner = null;
+      alert('Could not access camera devices.');
+    });
 }
 
 function stopQRScanner() {
@@ -589,6 +597,7 @@ function stopQRScanner() {
 function onQrScanSuccess(decodedText, decodedResult) {
   // When a QR is scanned, the decodedText is the ID of the card
   console.log(`QR Scanned successfully: ${decodedText}`);
+  stopQRScanner();
 
   // Play a brief beep alert or update status
   scannerStatus.textContent = 'Scanned!';
@@ -633,7 +642,7 @@ function displayCardPreview(card) {
 
   previewImage.src = card.image_url ? `${API_BASE}${card.image_url}` : 'https://placehold.co/250x350/161a23/ffffff?text=No+Image';
   previewName.textContent = card.name;
-  previewYear.textContent = card.year_made;
+  //previewYear.textContent = card.year_made;
   previewNumber.textContent = card.card_number;
   previewRarity.textContent = card.rarity;
   previewCondition.textContent = card.card_condition;
@@ -873,6 +882,7 @@ async function loadReports() {
 
       tr.innerHTML = `
         <td>#${sale.sale_id}</td>
+        <td>${sale.card_id}</td>
         <td><strong>${sale.card_name}</strong> <span class="text-faded">${sale.card_number}</span></td>
         <td>${sale.quantity}</td>
         <td>$${parseFloat(sale.base_price).toFixed(2)}</td>
@@ -1030,14 +1040,14 @@ function renderStickerPreview() {
     // Compute details to fit
     const nameText = card.name.length > 28 ? card.name.substring(0, 26) + '..' : card.name;
     const condText = card.card_condition.split(' ')[0]; // Near Mint -> Near
-    const yearText = card.year_made;
+    //const yearText = card.year_made;
     const rarityText = card.rarity.length > 12 ? card.rarity.substring(0, 10) + '..' : card.rarity;
 
     stickerDiv.innerHTML = `
-      <div class="sticker-info">
+      <div class="sticker-info"> 
         <div class="sticker-title">${nameText}</div>
         <div class="sticker-spec">No: ${card.card_number}</div>
-        <div class="sticker-spec">Year: ${yearText} • Cond: ${condText}</div>
+        <div class="sticker-spec">Code: ${card.id}</div>
         <div class="sticker-spec">Rarity: ${rarityText}</div>
         <div class="sticker-price">$${parseFloat(card.price).toFixed(2)}</div>
       </div>

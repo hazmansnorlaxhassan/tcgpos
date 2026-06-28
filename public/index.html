@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title> Pokemon TCG POS and Inventory</title>
+  <title>JOON KAWA POS</title>
 
   <!-- Modern Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -35,7 +35,7 @@
     <div class="auth-header">
       <div class="logo">
         <!--<i class="fa-solid fa-cube text-gradient"></i>-->
-        <span>Pokemon TCG POS Inventory System</span>
+        <span>JOON KAWA Pokemon POS</span>
       </div>
       <h2>Welcome Back</h2>
       <p>Sign in to access POS Inventory System</p>
@@ -44,7 +44,7 @@
     <form id="login-form">
       <div class="form-group">
         <label for="login-email"><i class="fa-solid fa-envelope"></i> Email Address</label>
-        <input type="email" id="login-email" required placeholder="admin@tcg.com">
+        <input type="email" id="login-email" required placeholder="yourname@email">
       </div>
       <div class="form-group">
         <label for="login-password"><i class="fa-solid fa-lock"></i> Password</label>
@@ -73,7 +73,7 @@
         <!--<i class="fa-solid fa-cube text-gradient"></i>-->
         <div class="brand-details">
 
-          <span class="brand-name">POKEMON TCG</span>
+          <span class="brand-name">JOON KAWA</span>
           <span class="brand-sub">POS Inventory System</span>
         </div>
       </div>
@@ -99,9 +99,9 @@
         <a href="#" class="nav-item admin-only" data-view="users-view">
           <i class="fa-solid fa-users-gear"></i> <span>Salespersons</span>
         </a>
-        <a href="#" class="nav-item" data-view="sticker-view">
+        <!--<a href="#" class="nav-item" data-view="sticker-view">
           <i class="fa-solid fa-print"></i> <span>Sticker Creator</span>
-        </a>
+        </a>-->
       </nav>
 
       <div class="sidebar-footer">
@@ -132,7 +132,7 @@
         <div class="control-bar">
           <div class="search-box glass-panel">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="inventory-search" placeholder="Search by name or number...">
+            <input type="text" id="inventory-search" placeholder="Search by name or number">
           </div>
           <div class="filter-actions">
             <button class="btn btn-secondary" id="btn-toggle-filters">
@@ -147,10 +147,7 @@
         <!-- Filter Drawer (Collapsible) -->
         <div class="filter-drawer glass-panel hidden" id="filter-drawer">
           <div class="filter-grid">
-            <div class="form-group">
-              <label>Year Made</label>
-              <input type="number" id="filter-year" placeholder="e.g. 1999">
-            </div>
+
             <div class="form-group">
               <label>Rarity</label>
               <select id="filter-rarity">
@@ -236,7 +233,7 @@
                 <div class="scanned-card-info">
                   <h4 id="preview-name">Base Set Charizard</h4>
                   <div class="details-row">
-                    <span>Year: <strong id="preview-year">1999</strong></span>
+                    <!--<span>Year: <strong id="preview-year">1999</strong></span>-->
                     <span>No: <strong id="preview-number">4/102</strong></span>
                   </div>
                   <div class="details-row">
@@ -345,6 +342,7 @@
               <thead>
                 <tr>
                   <th>Sale ID</th>
+                  <th>Card ID</th>
                   <th>Card Name</th>
                   <th>Quantity</th>
                   <th>Base Price</th>
@@ -373,11 +371,11 @@
             <form id="register-salesperson-form" class="mt-3">
               <div class="form-group">
                 <label for="reg-name">Full Name</label>
-                <input type="text" id="reg-name" required placeholder="e.g. Alex Mercer">
+                <input type="text" id="reg-name" required placeholder="Full Name">
               </div>
               <div class="form-group">
                 <label for="reg-email">Email Address</label>
-                <input type="email" id="reg-email" required placeholder="e.g. alex@tcg.com">
+                <input type="email" id="reg-email" required placeholder="Email">
               </div>
               <div class="form-group">
                 <label for="reg-password">Password</label>
@@ -457,12 +455,12 @@
           <div class="form-row-2">
             <div class="form-group">
               <label for="card-name">Card Name</label>
-              <input type="text" id="card-name" required placeholder="e.g. Black Luster Soldier">
+              <input type="text" id="card-name" required placeholder="e.g. 1st Edition Holo Dark Charizard">
             </div>
-            <div class="form-group">
+            <!--<div class="form-group">
               <label for="card-year">Year Made</label>
               <input type="number" id="card-year" required placeholder="e.g. 2004">
-            </div>
+            </div>-->
           </div>
           <div class="form-row-2">
             <div class="form-group">

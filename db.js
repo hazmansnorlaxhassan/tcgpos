@@ -77,6 +77,9 @@ async function initDB() {
           .split(';')
           .map(s => s.trim())
           .filter(s => s.length > 0);
+        
+        // Ensure year_made column is removed if present
+        //statements.push('ALTER TABLE cards DROP COLUMN IF EXISTS year_made');
 
         for (const sql of statements) {
           await conn.query(sql);

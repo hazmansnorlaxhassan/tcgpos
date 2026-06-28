@@ -339,6 +339,11 @@ input[type="file"] {
   display: flex;
   flex-direction: column;
   padding: 30px 20px;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .sidebar-brand {
